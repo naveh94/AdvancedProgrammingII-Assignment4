@@ -20,22 +20,29 @@ public class TCPClient implements IClient {
             @Override
             public void run() {
                 try {
+                    Log.i("TCP","Connecting...");
                     Socket socket = new Socket(ip, port);
+                    Log.i("TCP","Connected successfully");
                     try {
+                        Log.i("TCP", "Creating output stream...");
                         OutputStream out = socket.getOutputStream();
+                        Log.i("TCP", "Created output stream successfully.");
                         while (true) {
                             String buffer = stringQueue.take();
                             if (buffer.equals("")) {
+                                Log.i("ClientThread","Client received close command.");
                                 break;
                             }
                             buffer = buffer + "\n\r";
                             out.write(buffer.getBytes());
                             out.flush();
+                            Log.i("ClientThread", "Wrote to server: '" + buffer + "'.");
                         }
                     } catch (Exception e) {
                         Log.e("TCP", "S: Error", e);
                     } finally {
                         socket.close();
+                        Log.i("TCP","TCP socket was closed successfully.");
                     }
                 } catch (Exception e) {
                     Log.e("TCP", "C: Error", e);

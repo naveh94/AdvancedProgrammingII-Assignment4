@@ -4,6 +4,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             InetAddress.getByName(ipString);
             Integer.parseInt(portString);
+            Intent intent = new Intent(this, JoystickActivity.class);
+            startActivity(intent);
         } catch (Exception e) {
             Log.e("TCP", "C: Error", e);
             alert(this, e);
