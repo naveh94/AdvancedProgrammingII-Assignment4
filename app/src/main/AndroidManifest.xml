@@ -14,7 +14,7 @@
         <activity android:name=".View.JoystickActivity"
             android:screenOrientation="sensor"
             android:configChanges="orientation|screenSize"/>
-        <activity android:name=".View.MainActivity"
+        <activity android:name=".View.LoginActivity"
             android:screenOrientation="sensor"
             android:configChanges="orientation|screenSize">
             <intent-filter>

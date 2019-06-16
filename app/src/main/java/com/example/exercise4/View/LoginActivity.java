@@ -2,7 +2,6 @@ package com.example.exercise4.View;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.ViewCompat;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +12,11 @@ import com.example.exercise4.R;
 
 import java.net.InetAddress;
 
-public class MainActivity extends AppCompatActivity {
+/**
+ * The login activity for the application. Get an IP and Port from the user, and if valid will call
+ * to the JoystickActivity.
+ */
+public class LoginActivity extends AppCompatActivity {
 
     /***
      * Overriding the Activity's onCreate method. Set the contentView as the xml layout file.
@@ -22,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_login);
 
     }
 
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates an AlertDialog on the MainActivity view.
+     * Creates an AlertDialog on the LoginActivity view.
      * Is used in case of exception while parsing the IP or the Port, and is given a message
      * accordingly. The Close button is given null listener and therefore will do nothing except
      * closing the Dialog.
