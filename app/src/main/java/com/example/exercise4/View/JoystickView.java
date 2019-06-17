@@ -1,10 +1,11 @@
 package com.example.exercise4.View;
 
 import android.content.Context;
-import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.view.MotionEvent;
@@ -23,13 +24,14 @@ public class JoystickView extends View {
     //Constants:
     private static final int HANDLE_COLOR = Color.BLACK;
     private static final int BASE_COLOR = Color.DKGRAY;
-    private static final int BORDER_COLOR = Color.BLACK;
+    private static final int BORDER_COLOR = Color.LTGRAY;
     private static final int BORDER_WIDTH = 3;
     private static final double HANDLE_RATIO = 0.2;
     private static final double BASE_RATIO = 0.7;
 
     private Paint handlePaint;
-    private Paint handleReflPaint;
+    private Paint handleReflectionPaint;
+    private Paint arrowPaint;
     private Paint basePaint;
     private Paint borderPaint;
     private Paint baseMidPaint;
@@ -44,27 +46,34 @@ public class JoystickView extends View {
     private int baseRadios = 0;
 
     /**
-     * JoystickView's constructor. Creates the paints which will be used by the handle, the base
-     * and the border.
+     * JoystickView's constructor.
      * @param context Context - the context on which this view is shown.
      */
     public JoystickView(Context context) {
         super(context);
+        initPaints();
+    }
 
+    /**
+     *  Creates the paints which will be used for drawing the joystick.
+     */
+    private void initPaints() {
         handlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         handlePaint.setColor(HANDLE_COLOR);
         handlePaint.setStyle(Paint.Style.FILL);
-        handlePaint.setShadowLayer(handleRadios, 5, 5, Color.BLACK);
 
-        handleReflPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        handleReflPaint.setColor(Color.GRAY);
-        handleReflPaint.setAlpha(300);
-        handleReflPaint.setShadowLayer(handleRadios / 4, 5, 5, Color.GRAY);
-        handleReflPaint.setDither(true);
-        handleReflPaint.setStyle(Paint.Style.FILL);
+        handleReflectionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        handleReflectionPaint.setColor(Color.GRAY);
+        handleReflectionPaint.setAlpha(300);
+        handleReflectionPaint.setDither(true);
+        handleReflectionPaint.setStyle(Paint.Style.FILL);
 
         basePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         basePaint.setStyle(Paint.Style.FILL);
+
+        arrowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        arrowPaint.setStyle(Paint.Style.FILL);
+        arrowPaint.setAlpha(180);
 
         baseMidPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         baseMidPaint.setColor(Color.rgb(15,15,15));
@@ -74,6 +83,24 @@ public class JoystickView extends View {
         borderPaint.setColor(BORDER_COLOR);
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setStrokeWidth(BORDER_WIDTH);
+    }
+
+    /**
+     * Initialize the shaders for the Paints before drawing them.
+     * (some shaders are dependent on the object coordinates, and therefore cannot be initialized
+     * at the constructor).
+     */
+    private void initShaders() {
+        int r = handleRadios / 3;
+        int[] c = {Color.BLACK, Color.DKGRAY};
+        int[] c2 = {Color.WHITE, Color.BLACK};
+        basePaint.setShader(new RadialGradient(centerX, centerY, baseRadios, c,
+                null, Shader.TileMode.MIRROR));
+        handlePaint.setShader(new RadialGradient(positionX - r,
+                positionY - r, handleRadios + r, Color.GRAY,
+                Color.BLACK, Shader.TileMode.MIRROR));
+        arrowPaint.setShader(new LinearGradient(0,0, positionX, positionY, c2,null,
+                Shader.TileMode.MIRROR));
 
     }
 
@@ -128,13 +155,39 @@ public class JoystickView extends View {
      * @param canvas Canvas
      */
     private void drawBase(Canvas canvas) {
-        canvas.drawCircle(centerX, centerY, baseRadios + BORDER_WIDTH, borderPaint);
-        int[] c = {Color.BLACK, Color.DKGRAY};
-        basePaint.setShader(new RadialGradient(centerX, centerY, baseRadios, c,
-                null, Shader.TileMode.MIRROR));
-        int midRad = baseRadios - (baseRadios / 2);
+        canvas.drawCircle(centerX, centerY, baseRadios + BORDER_WIDTH * 2, borderPaint);
+        int midRad = baseRadios / 2;
         canvas.drawCircle(centerX, centerY, baseRadios, basePaint);
         canvas.drawCircle(centerX, centerY, midRad, baseMidPaint);
+        drawArrows(canvas);
+    }
+
+    /**
+     * draw the arrows on the joystick base.
+     * @param canvas
+     */
+    private void drawArrows(Canvas canvas) {
+        Path arrow = new Path();
+        // Down:
+        arrow.moveTo(centerX, centerY + handleRadios * 3);
+        arrow.rLineTo(-baseRadios / 4, -baseRadios / 4);
+        arrow.rLineTo(baseRadios / 2, 0);
+        arrow.close();
+        // UP:
+        arrow.moveTo(centerX, centerY - handleRadios * 3);
+        arrow.rLineTo(-baseRadios /4, baseRadios /4);
+        arrow.rLineTo(baseRadios / 2, 0);
+        arrow.close();
+        // Left:
+        arrow.moveTo(centerX - handleRadios * 3, centerY);
+        arrow.rLineTo(baseRadios / 4, -baseRadios / 4);
+        arrow.rLineTo(0, baseRadios / 2);
+        arrow.close();
+        // Right:
+        arrow.moveTo(centerX + handleRadios * 3, centerY);
+        arrow.rLineTo(-baseRadios / 4,-baseRadios / 4);
+        arrow.rLineTo(0, baseRadios / 2);
+        canvas.drawPath(arrow, arrowPaint);
     }
 
     /**
@@ -143,11 +196,8 @@ public class JoystickView extends View {
      */
     private void drawHandle(Canvas canvas) {
         int r = handleRadios / 3;
-        handlePaint.setShader(new RadialGradient(positionX - r,
-                positionY - r, handleRadios + r, Color.DKGRAY,
-                Color.BLACK, Shader.TileMode.MIRROR));
         canvas.drawCircle(positionX, positionY, handleRadios, handlePaint);
-        canvas.drawCircle(positionX - r, positionY - r, r, handleReflPaint);
+        canvas.drawCircle(positionX - r, positionY - r, r, handleReflectionPaint);
     }
 
     /**
@@ -157,6 +207,8 @@ public class JoystickView extends View {
      */
     @Override
     protected void onDraw(Canvas canvas) {
+        canvas.drawColor(Color.BLACK);
+        initShaders();
         drawBase(canvas);
         drawHandle(canvas);
     }
