@@ -1,9 +1,8 @@
-package com.example.exercise4.View;
+package com.example.exercise4.View.ViewObjects;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RadialGradient;
@@ -22,9 +21,6 @@ public class JoystickView extends View {
     }
 
     //Constants:
-    private static final int HANDLE_COLOR = Color.BLACK;
-    private static final int BASE_COLOR = Color.DKGRAY;
-    private static final int BORDER_COLOR = Color.LTGRAY;
     private static final int BORDER_WIDTH = 3;
     private static final double HANDLE_RATIO = 0.2;
     private static final double BASE_RATIO = 0.7;
@@ -59,7 +55,7 @@ public class JoystickView extends View {
      */
     private void initPaints() {
         handlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        handlePaint.setColor(HANDLE_COLOR);
+        handlePaint.setColor(Color.BLACK);
         handlePaint.setStyle(Paint.Style.FILL);
 
         handleReflectionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -80,28 +76,9 @@ public class JoystickView extends View {
         baseMidPaint.setStyle(Paint.Style.FILL);
 
         borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        borderPaint.setColor(BORDER_COLOR);
+        borderPaint.setColor(Color.LTGRAY);
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setStrokeWidth(BORDER_WIDTH);
-    }
-
-    /**
-     * Initialize the shaders for the Paints before drawing them.
-     * (some shaders are dependent on the object coordinates, and therefore cannot be initialized
-     * at the constructor).
-     */
-    private void initShaders() {
-        int r = handleRadios / 3;
-        int[] c = {Color.BLACK, Color.DKGRAY};
-        int[] c2 = {Color.WHITE, Color.BLACK};
-        basePaint.setShader(new RadialGradient(centerX, centerY, baseRadios, c,
-                null, Shader.TileMode.MIRROR));
-        handlePaint.setShader(new RadialGradient(positionX - r,
-                positionY - r, handleRadios + r, Color.GRAY,
-                Color.BLACK, Shader.TileMode.MIRROR));
-        arrowPaint.setShader(new LinearGradient(0,0, positionX, positionY, c2,null,
-                Shader.TileMode.MIRROR));
-
     }
 
     /**
@@ -116,10 +93,10 @@ public class JoystickView extends View {
      * Overriding the View's onSizeChanged method.
      * Resets the position of the joystick to the middle of the screen, and change their size
      * according to the lower value between the width and the height.
-     * @param w
-     * @param h
-     * @param oldw
-     * @param oldh
+     * @param w new width
+     * @param h new height
+     * @param oldw old width
+     * @param oldh old height
      */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -136,8 +113,7 @@ public class JoystickView extends View {
      * @return double - the angle
      */
     private double getAngle() {
-        double angle = Math.atan2(centerY - positionY, positionX - centerX);
-        return angle;
+        return Math.atan2(centerY - positionY, positionX - centerX);
     }
 
     /**
@@ -148,6 +124,24 @@ public class JoystickView extends View {
         long distance = Math.round ((100 * Math.sqrt((positionX - centerX) * (positionX - centerX) +
                 (positionY - centerY) * (positionY - centerY)) / baseRadios));
         return (int)distance;
+    }
+
+    /**
+     * Initialize the shaders for the Paints before drawing them.
+     * (some shaders are dependent on the object coordinates, and therefore cannot be initialized
+     * at the constructor).
+     */
+    private void initShaders() {
+        int r = handleRadios / 3;
+        int[] c = {Color.BLACK, Color.DKGRAY};
+        int[] c2 = {Color.WHITE, Color.BLACK};
+        basePaint.setShader(new RadialGradient(centerX, centerY, baseRadios, c,
+                null, Shader.TileMode.MIRROR));
+        handlePaint.setShader(new RadialGradient(positionX - r,
+                positionY - r, handleRadios + r, Color.GRAY,
+                Color.BLACK, Shader.TileMode.MIRROR));
+        arrowPaint.setShader(new RadialGradient(positionX, positionY,
+                baseRadios + handleRadios, c2,null, Shader.TileMode.CLAMP));
     }
 
     /**
@@ -164,29 +158,30 @@ public class JoystickView extends View {
 
     /**
      * draw the arrows on the joystick base.
-     * @param canvas
+     * @param canvas context's canvas
      */
     private void drawArrows(Canvas canvas) {
         Path arrow = new Path();
+        int arrowLine = baseRadios / 4, arrowDistance = handleRadios * 3;
         // Down:
-        arrow.moveTo(centerX, centerY + handleRadios * 3);
-        arrow.rLineTo(-baseRadios / 4, -baseRadios / 4);
-        arrow.rLineTo(baseRadios / 2, 0);
+        arrow.moveTo(centerX, centerY + arrowDistance);
+        arrow.rLineTo(-arrowLine, -arrowLine);
+        arrow.rLineTo(arrowLine * 2, 0);
         arrow.close();
         // UP:
-        arrow.moveTo(centerX, centerY - handleRadios * 3);
-        arrow.rLineTo(-baseRadios /4, baseRadios /4);
-        arrow.rLineTo(baseRadios / 2, 0);
+        arrow.moveTo(centerX, centerY - arrowDistance);
+        arrow.rLineTo(-arrowLine, arrowLine);
+        arrow.rLineTo(arrowLine * 2, 0);
         arrow.close();
         // Left:
-        arrow.moveTo(centerX - handleRadios * 3, centerY);
-        arrow.rLineTo(baseRadios / 4, -baseRadios / 4);
-        arrow.rLineTo(0, baseRadios / 2);
+        arrow.moveTo(centerX - arrowDistance, centerY);
+        arrow.rLineTo(arrowLine, -arrowLine);
+        arrow.rLineTo(0, arrowLine * 2);
         arrow.close();
         // Right:
-        arrow.moveTo(centerX + handleRadios * 3, centerY);
-        arrow.rLineTo(-baseRadios / 4,-baseRadios / 4);
-        arrow.rLineTo(0, baseRadios / 2);
+        arrow.moveTo(centerX + arrowDistance, centerY);
+        arrow.rLineTo(-arrowLine,-arrowLine);
+        arrow.rLineTo(0, arrowLine * 2);
         canvas.drawPath(arrow, arrowPaint);
     }
 
@@ -239,26 +234,30 @@ public class JoystickView extends View {
             positionY = (int) ((positionY - centerY) * baseRadios / abs + centerY);
         }
 
-        if (onMoveListener != null) {
-            onMoveListener.onMove(getAngle(), getDistance());
-        }
-
-        invalidate(); // Making sure the view is redrawn.
+        performClick();
+        invalidate();
         return true;
     }
 
     /**
+     * Calling onMoveListener.onMove when clicked.
+     * @return Boolean if onMoveListener exists return true, else returns false.
+     */
+    @Override
+    public boolean performClick() {
+        super.performClick();
+        if (onMoveListener != null) {
+            onMoveListener.onMove(getAngle(), getDistance());
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Set the joystick onMoveListener to given OnMoveListener object.
-     * @param onMoveListener
+     * @param onMoveListener OnMoveListener
      */
     public void setOnMoveListener(OnMoveListener onMoveListener) {
         this.onMoveListener = onMoveListener;
     }
-
-    /***
-     * Used when using the JoystickView as a layout object. As explained above,
-     * currently isn't used.
-     * @param widthMeasureSpec
-     * @param heightMeasureSpec
-     */
 }

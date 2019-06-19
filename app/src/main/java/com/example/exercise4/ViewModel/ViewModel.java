@@ -7,7 +7,7 @@ import android.content.DialogInterface.OnClickListener;
 import androidx.appcompat.app.AlertDialog;
 import com.example.exercise4.Model.FlightGearClient;
 import com.example.exercise4.Model.TCPClient.OnExceptionListener;
-import com.example.exercise4.View.JoystickView.OnMoveListener;
+import com.example.exercise4.View.ViewObjects.JoystickView.OnMoveListener;
 
 /**
  * The ViewModel class for the MVVM architecture. Serves as a model for the JoystickActivity class,
@@ -18,7 +18,6 @@ import com.example.exercise4.View.JoystickView.OnMoveListener;
  */
 public class ViewModel implements OnMoveListener, OnExceptionListener, OnClickListener {
 
-    private static ViewModel instance;
     private FlightGearClient model;
     private Activity view;
 
@@ -83,7 +82,4 @@ public class ViewModel implements OnMoveListener, OnExceptionListener, OnClickLi
         model.disconnect();
     }
 
-    public void destroyInstance() {
-        instance = null;
-    }
 }

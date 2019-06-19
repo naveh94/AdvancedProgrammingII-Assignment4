@@ -3,6 +3,8 @@ package com.example.exercise4.View;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.example.exercise4.View.ViewObjects.JoystickView;
 import com.example.exercise4.ViewModel.ViewModel;
 
 /***
@@ -40,6 +42,5 @@ public class JoystickActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         vm.disconnect();
-        vm.destroyInstance();
     }
 }
